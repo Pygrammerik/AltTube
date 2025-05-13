@@ -1,0 +1,46 @@
+[
+  {
+    "id": 1,
+    "username": "Devoleper",
+    "password": "HW87Jz4AdbYXkUT",
+    "is_banned": false,
+    "strikes": 0,
+    "avatar": "Devoleper_avatar.png",
+    "cover": "Devoleper_cover.png",
+    "subscriptions": [
+      2
+    ],
+    "subscriptions_count": 1,
+    "links": [
+      "t.me/itssooshka",
+      "https://youtube.com/@ItsSooshka"
+    ]
+  },
+  {
+    "id": 2,
+    "username": "rer",
+    "password": "HW87Jz4AdbYXkUT",
+    "is_banned": false,
+    "strikes": 0,
+    "subscriptions": [
+      1
+    ],
+    "avatar": "rer_avatar.png",
+    "cover": "rer_cover.png",
+    "subscriptions_count": 1,
+    "links": []
+  },
+  {
+    "id": 9999,
+    "username": "youtube_reuploads",
+    "password": "scrypt:32768:8:1$qtd7qrMlbYOuwSo2$f28a1154e75e4ee3b3c3d3f1989612de9d22a1d44b352fbe0a08edfd80c59ee73df057d90adf8b4d6b528b3c0aaab71f9e35fd175bade9b7d21a3c0c0c41a3a3",
+    "is_banned": false,
+    "strikes": 0,
+    "subscriptions": [],
+    "subscriptions_count": 0,
+    "avatar": "",
+    "cover": "",
+    "links": [],
+    "ip": ""
+  }
+]

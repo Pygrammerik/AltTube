@@ -1,0 +1,17 @@
+[
+  {
+    "user_id": 2,
+    "video_id": 1,
+    "watched": "2025-04-29 21:49"
+  },
+  {
+    "user_id": 2,
+    "video_id": 2,
+    "watched": "2025-04-30 14:29"
+  },
+  {
+    "user_id": 1,
+    "video_id": 1,
+    "watched": "2025-05-12 15:44"
+  }
+]

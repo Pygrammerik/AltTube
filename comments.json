@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "video_id": 5,
+    "author_id": 2,
+    "author_name": "User2",
+    "text": "Классное видео!",
+    "created": "2024-06-01 12:34"
+  },
+  {
+    "id": 2,
+    "video_id": 2,
+    "author_id": 2,
+    "author_name": "rer",
+    "text": "еееее",
+    "created": "2025-04-29 21:49"
+  },
+  {
+    "id": 3,
+    "video_id": 1,
+    "author_id": 1,
+    "author_name": "Devoleper",
+    "text": "OIIA !!!!",
+    "created": "2025-05-03 13:13"
+  }
+]

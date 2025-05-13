@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>{{ video.title }} - AltTube</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='yt.css') }}">
+    <style>
+        .custom-player {
+            background: #181818;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+            padding: 16px;
+        }
+        .custom-player video {
+            width: 100%;
+            border-radius: 8px;
+            background: #000;
+        }
+        .custom-player .controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .custom-player .progress {
+            flex: 1;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .custom-player .progress-bar {
+            background: #0d6efd;
+        }
+        .custom-player .btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5em;
+        }
+        .custom-player .btn:focus {
+            outline: none;
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('index') }}">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="height:40px;">
+            <span style="font-weight:bold;">AltTube</span>
+        </a>
+    </div>
+</nav>
+<div class="container mt-4">
+    <div class="row">
+        {% if current_user.is_authenticated %}
+        <div class="col-md-3">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">Подписки</div>
+                <ul class="list-group list-group-flush">
+                    {% for sub in subscriptions %}
+                    <li class="list-group-item">
+                        <a href="{{ url_for('profile', username=sub.username) }}">{{ sub.username }}</a>
+                    </li>
+                    {% else %}
+                    <li class="list-group-item text-muted">Нет подписок</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="card">
+                <div class="card-header bg-secondary text-white">История</div>
+                <ul class="list-group list-group-flush">
+                    {% for h in history|reverse %}
+                    {% set v = history_videos.get(h['video_id']) %}
+                    {% if v %}
+                    <li class="list-group-item">
+                        <a href="{{ url_for('video', video_id=h['video_id']) }}">{{ v.title }}</a>
+                        <span class="text-muted" style="font-size:0.85em;">{{ h['watched'] }}</span>
+                    </li>
+                    {% endif %}
+                    {% else %}
+                    <li class="list-group-item text-muted">История пуста</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-9">
+        {% else %}
+        <div class="col-md-12">
+        {% endif %}
+        <div class="col-md-8">
+            <div class="custom-player mb-3" id="customPlayer">
+                <video id="mainVideo" poster="{{ url_for('static', filename='previews/' + video.preview) }}" preload="metadata">
+                    <source src="{{ url_for('static', filename='uploads/' + video.filename) }}">
+                </video>
+                <div class="controls mt-2" id="customControls">
+                    <button class="btn" id="playPauseBtn" title="Play/Pause">
+                        <span id="playIcon">▶️</span>
+                        <span id="pauseIcon" style="display:none;">⏸️</span>
+                    </button>
+                    <div class="progress">
+                        <div class="progress-bar" id="progressBar" style="width:0%"></div>
+                    </div>
+                    <span id="currentTime" style="color:#fff; font-size:0.95em; min-width:50px;">0:00</span> /
+                    <span id="duration" style="color:#fff; font-size:0.95em; min-width:50px;">0:00</span>
+                    <button class="btn" id="muteBtn" title="Mute/Unmute">
+                        <span id="muteIcon">🔊</span>
+                        <span id="unmuteIcon" style="display:none;">🔇</span>
+                    </button>
+                    <button class="btn" id="fullscreenBtn" title="Fullscreen">⛶</button>
+                </div>
+            </div>
+            <h4>{{ video.title }}</h4>
+            <p class="text-muted">by <a href="{{ url_for('profile', username=video.user.username) }}">{{ video.user.username }}</a></p>
+            <p>{{ video.description }}</p>
+            <hr>
+            <div class="d-flex align-items-center mb-3">
+                {% if current_user.is_authenticated %}
+                    <form method="post" action="{{ url_for('like_video', video_id=video.id) }}" style="display:inline;">
+                        {% if not user_liked_video(current_user.id, video.id) %}
+                            <button type="submit" class="btn btn-outline-primary btn-sm me-2">👍</button>
+                        {% endif %}
+                    </form>
+                    <form method="post" action="{{ url_for('unlike_video', video_id=video.id) }}" style="display:inline;">
+                        {% if user_liked_video(current_user.id, video.id) %}
+                            <button type="submit" class="btn btn-outline-secondary btn-sm me-2">👍</button>
+                        {% endif %}
+                    </form>
+                    <form method="post" action="{{ url_for('dislike_video', video_id=video.id) }}" style="display:inline;">
+                        {% if not user_disliked_video(current_user.id, video.id) %}
+                            <button type="submit" class="btn btn-outline-danger btn-sm me-2">👎</button>
+                        {% endif %}
+                    </form>
+                    <form method="post" action="{{ url_for('undislike_video', video_id=video.id) }}" style="display:inline;">
+                        {% if user_disliked_video(current_user.id, video.id) %}
+                            <button type="submit" class="btn btn-outline-secondary btn-sm me-2">👎</button>
+                        {% endif %}
+                    </form>
+                {% endif %}
+                <span class="ms-2">👍 {{ get_video_likes(video.id)|length }}</span>
+                <span class="ms-2">👎 {{ get_video_dislikes(video.id)|length }}</span>
+            </div>
+            <h5>Комментарии</h5>
+            <div class="mb-3">
+                {% for comment in comments %}
+                <div class="border rounded p-2 mb-2 bg-light">
+                    <b>{{ comment.author_name }}</b> <span class="text-muted" style="font-size:0.9em">{{ comment.created }}</span><br>
+                    {{ comment.text }}
+                    {% if can_delete(comment) %}
+                        <a href="{{ url_for('delete_comment_route', comment_id=comment.id, video_id=video.id) }}" class="btn btn-sm btn-outline-danger float-end">Удалить</a>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% if current_user.is_authenticated %}
+            <form method="post">
+                {{ form.hidden_tag() }}
+                <div class="mb-3">
+                    {{ form.text.label(class="form-label") }}
+                    {{ form.text(class="form-control") }}
+                </div>
+                {{ form.submit(class="btn btn-primary") }}
+            </form>
+            {% else %}
+            <p><a href="{{ url_for('login') }}">Войдите</a>, чтобы оставить комментарий.</p>
+            {% endif %}
+        </div>
+        <div class="col-md-4">
+            <h6>Похожие видео</h6>
+            {% for v in videos if v.id != video.id %}
+            <div class="d-flex mb-3">
+                <a href="{{ url_for('video', video_id=v.id) }}">
+                    <img src="{{ url_for('static', filename='previews/' + v.preview) }}" width="120" style="aspect-ratio: 16/9; object-fit: cover;">
+                </a>
+                <div class="ms-2">
+                    <a href="{{ url_for('video', video_id=v.id) }}" class="text-dark text-decoration-none">
+                        <div style="font-size: 1em;">{{ v.title }}</div>
+                    </a>
+                    <div class="text-muted" style="font-size: 0.9em;">by <a href="{{ url_for('profile', username=v.user.username) }}">{{ v.user.username }}</a></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        </div>
+    </div>
+</div>
+<script>
+const video = document.getElementById('mainVideo');
+const playBtn = document.getElementById('playPauseBtn');
+const playIcon = document.getElementById('playIcon');
+const pauseIcon = document.getElementById('pauseIcon');
+const muteBtn = document.getElementById('muteBtn');
+const muteIcon = document.getElementById('muteIcon');
+const unmuteIcon = document.getElementById('unmuteIcon');
+const fullscreenBtn = document.getElementById('fullscreenBtn');
+const progressBar = document.getElementById('progressBar');
+const currentTime = document.getElementById('currentTime');
+const duration = document.getElementById('duration');
+const customControls = document.getElementById('customControls');
+const customPlayer = document.getElementById('customPlayer');
+
+function formatTime(sec) {
+    sec = Math.floor(sec);
+    return Math.floor(sec/60) + ':' + ('0'+(sec%60)).slice(-2);
+}
+
+video.addEventListener('loadedmetadata', () => {
+    duration.textContent = formatTime(video.duration);
+});
+video.addEventListener('timeupdate', () => {
+    currentTime.textContent = formatTime(video.currentTime);
+    progressBar.style.width = (video.currentTime/video.duration*100) + '%';
+});
+playBtn.onclick = () => {
+    if (video.paused) { video.play(); } else { video.pause(); }
+};
+video.onplay = () => { playIcon.style.display = 'none'; pauseIcon.style.display = ''; };
+video.onpause = () => { playIcon.style.display = ''; pauseIcon.style.display = 'none'; };
+muteBtn.onclick = () => {
+    video.muted = !video.muted;
+    muteIcon.style.display = video.muted ? 'none' : '';
+    unmuteIcon.style.display = video.muted ? '' : 'none';
+};
+fullscreenBtn.onclick = () => {
+    if (video.requestFullscreen) video.requestFullscreen();
+};
+progressBar.parentElement.onclick = (e) => {
+    const rect = progressBar.parentElement.getBoundingClientRect();
+    const percent = (e.clientX - rect.left) / rect.width;
+    video.currentTime = percent * video.duration;
+};
+
+// Скрывать кастомные контролы в полноэкранном режиме
+function isFullscreen() {
+    return document.fullscreenElement === video || document.fullscreenElement === customPlayer;
+}
+function updateControlsVisibility() {
+    if (isFullscreen()) {
+        customControls.style.display = 'none';
+        video.setAttribute('controls', 'controls');
+    } else {
+        customControls.style.display = '';
+        video.removeAttribute('controls');
+    }
+}
+document.addEventListener('fullscreenchange', updateControlsVisibility);
+// На старте показываем только кастомные
+updateControlsVisibility();
+</script>
+</body>
+</html>
